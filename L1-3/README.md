@@ -1,3 +1,5 @@
+## 1-3　把最小的 Python 腳本容器化
+
 詳細解釋：
 
 1. `FROM python:3.13-slim`：指定基底映像檔。官方的 `python:3.13-slim` 已經幫你裝好 Python 3.13，`slim` 版本把不必要的東西砍掉，體積小很多。**這一行等於決定了容器裡的 Python 版本**，不是看你自己主機的版本。
@@ -12,7 +14,7 @@ docker build -t hello-py:1.0 .
 docker run --rm hello-py:1.0
 ```
 
-逐項詳細解釋：
+詳細解釋：
 
 1. `docker build`：啟動建置流程，讀取當前資料夾裡的 `Dockerfile`。
 2. `-t hello-py:1.0`：幫這個映像檔取名字（tag）。冒號前面是名稱 `hello-py`、後面是版本 `1.0`。取好名字之後才方便 run、方便管理。
