@@ -8,7 +8,7 @@ docker info
 docker run --rm hello-world
 ```
 
-逐項詳細解釋：
+詳細解釋：
 
 1. `docker version`：印出用戶端（你打指令的 CLI）和伺服端（背景那顆 Docker 引擎）各自的版本。如果只看到用戶端、伺服端那段噴錯，代表引擎沒開，先去把 Docker Desktop 或 docker 服務啟動起來。
 2. `docker info`：印出這台機器目前的整體狀態，例如已經有幾個映像檔、幾個容器、用的是哪種儲存驅動。這條是你日後排查問題的第一站。
