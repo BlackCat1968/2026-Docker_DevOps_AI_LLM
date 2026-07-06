@@ -1,0 +1,6 @@
+# type=bind:把 context 裡的檔案「借進來用」而不 COPY 成層
+FROM python:3.13-slim
+WORKDIR /app
+RUN --mount=type=bind,source=requirements.txt,target=/tmp/requirements.txt     --mount=type=cache,target=/root/.cache/pip     pip install -r /tmp/requirements.txt
+
+# docker build -f Dockerfile.bindmount -t webapp:bindmount . && docker run --rm --entrypoint sh webapp:bindmount -c "ls /tmp/requirements.txt 2>/dev/null || echo '檔案沒有留在映像檔裡,只是借用'"

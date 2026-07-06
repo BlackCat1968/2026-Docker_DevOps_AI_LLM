@@ -1,0 +1,35 @@
+FROM python:3.13-slim AS builder
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libc6-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+
+FROM python:3.13-slim
+RUN useradd --create-home --shell /usr/sbin/nologin appuser
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY --chown=appuser:appuser app.py .
+USER appuser
+EXPOSE 8000
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
+# 第一次建置:正常下載,快取開始蓄水
+# docker build -f Dockerfile.cached -t webapp:cached .
+
+# 動一下需求清單,模擬「加了一個新套件」
+# echo "orjson==3.10.12" >> requirements.txt
+
+# 重建計時:舊套件全部從快取秒取,只下載新加的那一個
+# time docker build -f Dockerfile.cached -t webapp:cached .
