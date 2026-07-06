@@ -6,3 +6,18 @@
 6. `EXPOSE 8000`：純文件性質的中繼資料，向使用者宣告「本服務聽 8000」；它**不會**真的開放連接埠，對外開門是 `docker run -p` 的工作（第 10 章詳解）。
 7. `CMD [...]`：容器的預設啟動指令。**必須綁 `--host 0.0.0.0`**——預設的 127.0.0.1 只聽容器自己的迴環介面，主機轉進來的流量會被拒於門外，這是容器化 Web 服務的第一大雷。
 8. CMD 用的是**中括號 JSON 陣列寫法（exec form）**：行程直接成為 PID 1、訊號直達。第 04 章的訊號黑洞就是 shell form 惹的禍，本章給根治寫法，6.4 節專門對照。
+
+
+# 建置:-t 貼名字,最後的 . 就是 build context
+docker build -t webapp:1.0 .
+
+# 執行:把主機 8000 轉進容器 8000
+docker run -d --name web --rm -p 8000:8000 webapp:1.0
+
+# 驗收三連:根路徑、健康端點、容器日誌
+curl -s http://localhost:8000/
+curl -s http://localhost:8000/healthz
+docker logs web | tail -3
+
+# 回收第 05 章技能:看看這份映像檔被蓋了幾層、各層多大
+docker history webapp:1.0
