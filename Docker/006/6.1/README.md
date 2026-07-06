@@ -1,29 +1,5 @@
 ## 6.1 建置的運作模型：context、指令、層
 
-先建立心智模型再動手：
-
-```plantuml
-@startuml
-skinparam defaultFontName "Noto Sans CJK TC"
-title docker build 的運作流程
-
-rectangle "專案目錄\n(build context)" as ctx
-rectangle "Dockerfile\n(食譜)" as df
-rectangle "BuildKit\n(建置引擎)" as bk
-rectangle "層 1: FROM 基底" as l1
-rectangle "層 2: 裝相依套件" as l2
-rectangle "層 3: 放程式碼" as l3
-rectangle "映像檔\n(含中繼資料)" as img
-
-ctx -right-> bk : 打包上傳
-df -right-> bk : 逐條執行
-bk -down-> l1
-l1 -down-> l2
-l2 -down-> l3
-l3 -right-> img : 疊層 + config
-@enduml
-```
-
 - **build context**：你在 `docker build` 最後指定的那個目錄（通常是 `.`）。整個目錄會被打包送給建置引擎，`COPY` 只能拿 context 裡面的東西——context 之外的檔案，建置過程根本看不到。
 - **BuildKit**：現行的建置引擎（第 02 章五件套裡的 buildx 外掛就是它的介面），平行處理、聰明快取都是它的本事，第 07 章火力全開。
 - **一條指令一層**：`RUN`、`COPY`、`ADD` 這類會改動檔案系統的指令各蓋一層；`ENV`、`LABEL`、`CMD` 這類只改中繼資料的，反映在 config 裡（第 05 章 history 中 SIZE 為 0 的那些列）。
