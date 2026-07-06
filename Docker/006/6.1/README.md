@@ -1,23 +1,35 @@
-1. `FROM python:3.13-slim`：站上第 05 章選型結論的甜蜜點基底——glibc 相容、體積可控。每份 Dockerfile 的第一條有效指令必是 FROM。
-2. `WORKDIR /app`：設定之後所有指令的工作目錄，目錄不存在會自動建立。用它取代滿地的 `cd`，路徑心智負擔歸零。
-3. `COPY requirements.txt .`：先只複製相依清單——**這行的位置是本章最重要的一行**，理由在 6.5 節的快取法則揭曉。
-4. `RUN pip install --no-cache-dir -r requirements.txt`：在建置期執行安裝，產出一個「裝好所有套件」的層。`--no-cache-dir` 叫 pip 不要留下載快取，映像檔直接瘦一圈——容器層裡的 pip 快取只會佔空間，永遠用不到。
-5. `COPY app.py .`：程式碼最後才進來，天天改的東西放最下層。
-6. `EXPOSE 8000`：純文件性質的中繼資料，向使用者宣告「本服務聽 8000」；它**不會**真的開放連接埠，對外開門是 `docker run -p` 的工作（第 10 章詳解）。
-7. `CMD [...]`：容器的預設啟動指令。**必須綁 `--host 0.0.0.0`**——預設的 127.0.0.1 只聽容器自己的迴環介面，主機轉進來的流量會被拒於門外，這是容器化 Web 服務的第一大雷。
-8. CMD 用的是**中括號 JSON 陣列寫法（exec form）**：行程直接成為 PID 1、訊號直達。第 04 章的訊號黑洞就是 shell form 惹的禍，本章給根治寫法，6.4 節專門對照。
+## 6.1 建置的運作模型：context、指令、層
 
+先建立心智模型再動手：
 
-# 建置:-t 貼名字,最後的 . 就是 build context
-docker build -t webapp:1.0 .
+- **build context**：你在 `docker build` 最後指定的那個目錄（通常是 `.`）。整個目錄會被打包送給建置引擎，`COPY` 只能拿 context 裡面的東西——context 之外的檔案，建置過程根本看不到。
+- **BuildKit**：現行的建置引擎（第 02 章五件套裡的 buildx 外掛就是它的介面），平行處理、聰明快取都是它的本事，第 07 章火力全開。
+- **一條指令一層**：`RUN`、`COPY`、`ADD` 這類會改動檔案系統的指令各蓋一層；`ENV`、`LABEL`、`CMD` 這類只改中繼資料的，反映在 config 裡（第 05 章 history 中 SIZE 為 0 的那些列）。
 
-# 執行:把主機 8000 轉進容器 8000
-docker run -d --name web --rm -p 8000:8000 webapp:1.0
+context 的邊界感用一個小實驗建立：
 
-# 驗收三連:根路徑、健康端點、容器日誌
-curl -s http://localhost:8000/
-curl -s http://localhost:8000/healthz
-docker logs web | tail -3
+```bash
+# 建一個放在 context 之外的檔案,證明 COPY 拿不到它
+mkdir -p ~/outside && echo "外面的世界" > ~/outside/secret.txt
+mkdir -p ~/ctx-lab && cd ~/ctx-lab
 
-# 回收第 05 章技能:看看這份映像檔被蓋了幾層、各層多大
-docker history webapp:1.0
+cat > Dockerfile <<'EOF'
+FROM alpine
+COPY ../outside/secret.txt /tmp/
+EOF
+
+docker build -t lab:ctx . ; echo "結束碼: $?"
+```
+
+- 建置直接失敗：COPY 的來源路徑不准指到 context（`.`）之外，`../` 這種越界寫法會被擋下。這不是限制而是保護——build context 是建置的沙盒邊界，映像檔的內容來源被鎖定在一個可稽核的目錄裡。
+- 真的要用到外部檔案，正解是調整 context 範圍（把 build 指令的最後一個參數指到更上層目錄，搭配 `-f` 指定 Dockerfile 位置），而不是搬檔案繞路。
+- 收尾：`cd ~ && rm -rf ~/ctx-lab ~/outside`。
+
+順帶一提，context 不一定是本機目錄——直接拿 Git 儲存庫當 context 也行：
+
+```bash
+# 直接建置遠端儲存庫(BuildKit 會自己 clone,#後面指定分支或標籤)
+docker build -t remote-demo https://github.com/docker/getting-started.git#main 2>&1 | tail -2
+```
+
+- CI 環境與「快速試建別人專案」時特別好用，本機連 clone 都省了；私有庫則需要憑證設定，屬第 16 章的守備範圍。
