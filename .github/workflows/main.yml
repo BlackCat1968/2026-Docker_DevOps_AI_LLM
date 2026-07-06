@@ -3,23 +3,17 @@ on: push
 jobs:
   generate_plantuml:
     runs-on: ubuntu-latest
+    name: plantuml
     permissions:
-      contents: write
+      contents: write          # ← 關鍵:讓 GITHUB_TOKEN 能 push 回 repo
     steps:
-    - uses: actions/checkout@v4
-
-    - name: 安裝 PlantUML
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y plantuml graphviz
-
-    - name: 渲染 SVG
-      run: plantuml -tsvg "example/**.puml"
-
-    - name: commit 產出
-      run: |
-        git config user.name  "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add -A
-        git diff --staged --quiet || git commit -m "Render PlantUML files"
-        git push
+    - name: checkout
+      uses: actions/checkout@v5   # ← node24,清掉 checkout 的警告
+    - name: plantuml
+      id: plantuml
+      uses: grassedge/generate-plantuml-action@v1.5
+      with:
+        path: example
+        message: "Render PlantUML files"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
