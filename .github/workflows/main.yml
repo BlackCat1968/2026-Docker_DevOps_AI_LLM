@@ -1,19 +1,16 @@
-name: generate plantuml
-on: push
-jobs:
-  generate_plantuml:
-    runs-on: ubuntu-latest
-    name: plantuml
-    permissions:
-      contents: write          # ← 關鍵:讓 GITHUB_TOKEN 能 push 回 repo
-    steps:
-    - name: checkout
-      uses: actions/checkout@v5   # ← node24,清掉 checkout 的警告
-    - name: plantuml
-      id: plantuml
-      uses: grassedge/generate-plantuml-action@v1.5
-      with:
-        path: example
-        message: "Render PlantUML files"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: 'Generate PlantUML'
+author: 'grassedge'
+description: 'Generate uml diagrams with Plantuml Server and push them to your repository.'
+inputs:
+  path:
+    description: 'path to directory which generated svg is stored'
+    default: '.'
+  message:
+    description: 'the commit message when committing generated images'
+    default: 'Render PlantUML files'
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+branding:
+  icon: 'image'
+  color: 'gray-dark'
