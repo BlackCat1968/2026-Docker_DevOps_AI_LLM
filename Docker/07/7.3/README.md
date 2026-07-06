@@ -7,6 +7,7 @@
 5. 快取本體的管理：`docker builder du` 看佔用、`docker builder prune` 清空——它不在 images 清單裡，別找錯地方。
 
 **盤點與清理建置快取(cache mount 與層快取都在這)**
+
 docker builder du | tail -3
 
 ## Dockerfile.bindmount
