@@ -6,7 +6,7 @@
 4. 同樣的招式適用所有套件管理器：apt 掛 `/var/cache/apt`、npm 掛 `/root/.npm`，目標路徑換成該工具的快取位置即可。
 5. 快取本體的管理：`docker builder du` 看佔用、`docker builder prune` 清空——它不在 images 清單裡，別找錯地方。
 
-# 盤點與清理建置快取(cache mount 與層快取都在這)
+**盤點與清理建置快取(cache mount 與層快取都在這)**
 docker builder du | tail -3
 
 ## Dockerfile.bindmount
