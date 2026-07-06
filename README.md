@@ -1,14 +1,6 @@
----
-title: "BlackCat Studio 2026 — 年度技術免費培訓計畫"
-date: 2026-02-01T00:00:00+08:00
-description: "BlackCat Studio 2026 免費技術培訓：Docker、DevOps、AI LLM、MCP 共八門實戰課程。三大路徑、四個月、從容器到智慧應用，系統化建構全端技術力。5/3 開課。"
-summary: "三大路徑、八門課程、四個月。BlackCat Studio 2026 免費技術培訓計畫——從 Docker 容器化到 AI 大型語言模型，系統化建構你在 2026 年最需要的技術能力。"
-author: "玄貓（BlackCat）"
-categories: ["技術培訓", "免費課程"]
-tags: ["免費課程", "Docker", "DevOps", "AI", "LLM", "大型語言模型", "容器化", "Kubernetes", "CI/CD", "MCP", "Python", "Streamlit", "全端開發", "技術培訓", "台灣", "線上課程", "2026"]
-slug: "course"
-draft: false
----
+
+# "BlackCat Studio 2026 — 年度技術免費培訓計畫"
+
 
 **三大路徑。八門課程。四個月。從容器化部署到 AI 智慧應用，系統化建構全端技術即戰力。**
 
