@@ -1,0 +1,39 @@
+FROM python:3.13-slim AS base
+WORKDIR /app
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+FROM base AS dev
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install pytest==8.3.4 httpx==0.28.1
+COPY . .
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+FROM base AS test
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install pytest==8.3.4 httpx==0.28.1
+COPY . .
+CMD ["pytest", "-q"]
+
+FROM python:3.13-slim AS prod
+RUN useradd --create-home --shell /usr/sbin/nologin appuser
+COPY --from=base /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
+WORKDIR /app
+COPY --chown=appuser:appuser app.py .
+USER appuser
+EXPOSE 8000
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+# 各取所需:--target 指定要建到哪個階段為止
+# docker build -f Dockerfile.multi --target dev  -t webapp:dev .
+# docker build -f Dockerfile.multi --target prod -t webapp:prod .
+
+# 三胞胎體檢:開發版有 pytest、正式版沒有
+# docker run --rm --entrypoint pip webapp:dev  list 2>/dev/null | grep -i pytest || true
+# docker run --rm --entrypoint pip webapp:prod list 2>/dev/null | grep -i pytest || echo "正式版查無 pytest,乾淨"
+# docker images --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E "webapp:(dev|prod)"
