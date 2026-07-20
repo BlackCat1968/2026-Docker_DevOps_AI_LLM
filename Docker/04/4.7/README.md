@@ -1,3 +1,4 @@
+```
 # 記憶體上限 200MB,swap 一併鎖死(兩值相同 = 禁用 swap)
 docker run -d --name limited --memory=200m --memory-swap=200m \
   python:3.13-alpine python -c "import time
@@ -16,3 +17,4 @@ docker stats --no-stream limited
 CID=$(docker inspect limited --format '{{.Id}}')
 cat /sys/fs/cgroup/system.slice/docker-$CID.scope/memory.max
 cat /sys/fs/cgroup/system.slice/docker-$CID.scope/pids.max
+```
