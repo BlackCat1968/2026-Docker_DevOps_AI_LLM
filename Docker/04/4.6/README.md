@@ -1,3 +1,4 @@
+```
 # 崩潰才重啟,最多重試 3 次:適合批次任務
 docker run -d --name crashy --restart=on-failure:3 alpine sh -c "sleep 2; exit 1"
 
@@ -15,3 +16,4 @@ docker stop diehard prod-web
 sudo systemctl restart docker
 docker ps --format 'table {{.Names}}\t{{.Status}}'
 docker rm -f crashy diehard prod-web
+```
