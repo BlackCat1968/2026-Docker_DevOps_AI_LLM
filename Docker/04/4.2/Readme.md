@@ -1,3 +1,4 @@
+```
 # 溫柔停止:先送 SIGTERM,寬限期後仍不走才補 SIGKILL(預設寬限 10 秒)
 docker stop web1
 
@@ -13,3 +14,4 @@ docker start web1 && docker kill --signal=HUP web1
 # 驗屍:看結束碼判斷死法
 docker stop web1
 docker inspect web1 --format '結束碼: {{.State.ExitCode}}'
+```
